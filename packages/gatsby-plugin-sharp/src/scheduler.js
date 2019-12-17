@@ -16,16 +16,20 @@ const cleanupJob = (job, boundActionCreators) => {
     bar.tick(job.task.args.operations.length)
   }
 
-  completedImagesCounter += job.task.args.operations.length
+  setTimeout(() => {
+    completedImagesCounter += job.task.args.operations.length
 
-  if (completedImagesCounter === pendingImagesCounter) {
-    if (bar) {
-      bar.done()
-      bar = null
+    if (completedImagesCounter === pendingImagesCounter) {
+      if (bar) {
+        bar.done()
+        bar = null
+      }
+      pendingImagesCounter = 0
+      completedImagesCounter = 0
     }
-    pendingImagesCounter = 0
-    completedImagesCounter = 0
-  }
+
+    // wait 1 second to finish off the progress bar in case more images are added
+  }, 1000)
 
   boundActionCreators.endJob({ id: job.id }, { name: `gatsby-plugin-sharp` })
 }
