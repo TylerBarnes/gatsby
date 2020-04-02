@@ -17,6 +17,8 @@ module.exports = runApisInSteps({
     steps.setImageNodeIdCache,
   ],
 
+  onPreExtractQueries: [steps.createPreviewRedirect],
+
   onPostBuild: [steps.setImageNodeIdCache],
 
   onCreateDevServer: [

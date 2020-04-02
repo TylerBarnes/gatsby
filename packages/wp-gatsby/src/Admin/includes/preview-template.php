@@ -2,11 +2,17 @@
 
   wp_head();
 
-  global $wp;
-  $page_path = add_query_arg( array(), $wp->request );
+  global $post;
+
+  $post_type = $post->post_type;
+  $post_id = $post->ID;
+  $relay_id = base64_encode("$post_type:$post_id");
+  $gatsby_path = "___wp-preview/?id=$relay_id";
 
   $preview_url = \WPGatsby\Admin\Preview::get_gatsby_preview_instance_url();
-  $frontend_url = "$preview_url$page_path";
+  $preview_url = rtrim( $preview_url, '/' );
+
+  $frontend_url = "$preview_url/$gatsby_path";
 ?>
 
 <html lang="en">

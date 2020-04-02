@@ -43,11 +43,15 @@ class Preview {
   }
 
   public function post_to_preview_instance( $post_ID, $post ) {
+      if ( $post->post_type === 'action_monitor' ) {
+        return false;
+      }
+
       if ( $post->post_status === 'auto-draft' ) {
         return false;
       }
 
-      if ( $post->post_type !== 'revision' ) {
+      if ( $post->post_type !== 'revision' && $post->post_status !== "draft" ) {
         return false;
       }
 
@@ -81,7 +85,7 @@ class Preview {
         'singleName' => $referenced_node_single_name
       ];
 
-      wp_remote_post(
+      $result = wp_remote_post(
         $preview_url,
         [
           'body' => wp_json_encode( $post_body ),

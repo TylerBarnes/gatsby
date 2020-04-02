@@ -66,7 +66,17 @@ export const fetchAndCreateSingleNode = async ({
 
   const existingNode = await getNode(id)
 
-  if (previewId && existingNode) {
+  let remoteNode = data[singleName]
+
+  console.log(`------`)
+  console.log(`new preview`)
+  console.log(`------`)
+  console.log(remoteNode.uri)
+
+  console.log(remoteNode)
+
+  if (previewId && existingNode && remoteNode.status !== `draft`) {
+    // this is a preview of an existing post
     const originalFieldsToRetain = {
       uri: existingNode.uri,
       link: existingNode.link,
@@ -78,11 +88,27 @@ export const fetchAndCreateSingleNode = async ({
       id,
     }
 
-    data[singleName] = {
-      ...data[singleName],
+    remoteNode = {
+      ...remoteNode,
       ...originalFieldsToRetain,
     }
   }
+
+  console.log(remoteNode.uri)
+
+  if (remoteNode.uri.includes(`?`)) {
+    // this is a brand new post preview of a draft
+    // we can use it as is, but the path may be something like ?p=5543.
+    // That is no good for Gatsby, we need to convert that to something like /p/5543
+    // seems the easiest solution is to replace ? and = with /
+    const newUri = remoteNode.uri.replace(`?`, ``).replace(`=`, `/`)
+
+    console.log(newUri)
+
+    remoteNode.uri = newUri
+  }
+
+  data[singleName] = remoteNode
 
   // returns an object
   const createdNode = await createSingleNode({
