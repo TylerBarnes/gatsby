@@ -28,7 +28,7 @@ final class WPGatsby {
 	/**
 	 * Instance of the main WPGatsby class
 	 *
-	 * @var WPGatsby $instance
+	 * @var WPGatsby|null $instance
 	 */
 	private static $instance;
 
@@ -42,7 +42,7 @@ final class WPGatsby {
 		if ( ! isset( self::$instance ) && ! ( self::$instance instanceof WPGatsby ) ) {
 			self::$instance = new WPGatsby();
 			self::$instance->setup_constants();
-			if ( WPGATSBY_AUTOLOAD ) {
+			if ( true === WPGATSBY_AUTOLOAD ) {
 				self::$instance->includes();
 				self::$instance->init();
 			}

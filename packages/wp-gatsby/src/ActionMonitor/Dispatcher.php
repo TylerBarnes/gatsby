@@ -18,9 +18,9 @@ class Dispatcher {
 	}
 
 	/**
-	 * @param $post_id int The ID of the Post being saved
-	 * @param $post    \WP_Post The Post Object being saved
-	 * @param $update  bool Whether this is an existing post being updated or not.
+	 * @param int      $post_id The ID of the Post being saved
+	 * @param \WP_Post $post    \WP_Post The Post Object being saved
+	 * @param bool     $update  Whether this is an existing post being updated or not.
 	 */
 	public function queue_dispatch( $post_id, $post, $update ) {
 		$this->should_dispatch = true;

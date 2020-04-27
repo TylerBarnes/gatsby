@@ -12,7 +12,7 @@ $post_type_object = \get_post_type_object( $post->post_type );
 
 $global_relay_id = Relay::toGlobalId(
 	$post_type_object->name,
-	absint( $post_id )
+	$post_id
 );
 
 $referenced_node_single_name

@@ -297,7 +297,7 @@ class ActionMonitor {
 			? $current_user->data->user_nicename
 			: "User";
 
-		$relay_id = Relay::toGlobalId( 'user', $user_id );
+		$relay_id = Relay::toGlobalId( 'user', strval( $user_id ) );
 
 		$this->insertNewAction( [
 			'action_type'         => $user_is_public ? 'CREATE' : 'DELETE',
@@ -322,10 +322,12 @@ class ActionMonitor {
 			return null;
 		}
 
+		/** @var string|null $graphql_single_name */
 		$graphql_single_name = $taxonomy_object->graphql_single_name ?? null;
+		/** @var string|null $graphql_plural_name */
 		$graphql_plural_name = $taxonomy_object->graphql_plural_name ?? null;
 
-		if ( ! $graphql_plural_name || ! $graphql_single_name ) {
+		if ( null === $graphql_plural_name || null === $graphql_single_name ) {
 			return null;
 		}
 
@@ -635,7 +637,7 @@ class ActionMonitor {
 		$global_relay_id = '';
 		$global_relay_id = Relay::toGlobalId(
 			$post_type_object->name,
-			absint( $post_id )
+			$post_id
 		);
 
 		$referenced_node_single_name
@@ -912,7 +914,7 @@ class ActionMonitor {
 			"description"           => "Used to keep a log of actions in WordPress for cache invalidation in gatsby-source-wpgraphql.",
 			"public"                => false,
 			"publicly_queryable"    => false,
-			"show_ui"               => defined( 'GRAPHQL_DEBUG' ) && GRAPHQL_DEBUG,
+			"show_ui"               => defined( 'GRAPHQL_DEBUG' ) && true === GRAPHQL_DEBUG,
 			"delete_with_user"      => false,
 			"show_in_rest"          => true,
 			"rest_base"             => "",
