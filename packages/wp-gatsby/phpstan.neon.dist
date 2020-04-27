@@ -1,0 +1,21 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+parameters:
+## TODO    level: max
+    level: 5
+    inferPrivatePropertyTypeFromConstructor: true
+    autoload_files:
+        - tests/bootstrap.php
+        - wp-content/plugins/wp-graphql/access-functions.php
+        - wp-content/plugins/wp-graphql/wp-graphql.php
+        - wp-gatsby.php
+    paths:
+        - wp-gatsby.php
+        - lib/
+        - src/
+    dynamicConstantNames:
+        - WPGATSBY_AUTOLOAD
+        - GRAPHQL_DEBUG
+    ignoreErrors:
+        # Our new properties :)
+        - '#^Access to an undefined property (WP_Post_Type|WP_Taxonomy)::\$(graphql_single_name|graphql_plural_name)\.$#'
