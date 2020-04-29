@@ -1,3 +1,4 @@
+import url from "url"
 import execall from "execall"
 import fetchReferencedMediaItemsAndCreateNodes from "../fetch-nodes/fetch-referenced-media-items"
 import urlToPath from "~/utils/url-to-path"
@@ -10,12 +11,36 @@ import {
   getTypeSettingsByType,
 } from "~/steps/create-schema-customization/helpers"
 
-// const imgSrcRemoteFileRegex = /(?:src=\\")((?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#/%=~_|$?!:,.]*\)|[A-Z0-9+&@#/%=~_|$])\.(?:jpeg|jpg|png|gif|ico|pdf|doc|docx|ppt|pptx|pps|ppsx|odt|xls|psd|mp3|m4a|ogg|wav|mp4|m4v|mov|wmv|avi|mpg|ogv|3gp|3g2|svg|bmp|tif|tiff|asf|asx|wm|wmx|divx|flv|qt|mpe|webm|mkv|txt|asc|c|cc|h|csv|tsv|ics|rtx|css|htm|html|m4b|ra|ram|mid|midi|wax|mka|rtf|js|swf|class|tar|zip|gz|gzip|rar|7z|exe|pot|wri|xla|xlt|xlw|mdb|mpp|docm|dotx|dotm|xlsm|xlsb|xltx|xltm|xlam|pptm|ppsm|potx|potm|ppam|sldx|sldm|onetoc|onetoc2|onetmp|onepkg|odp|ods|odg|odc|odb|odf|wp|wpd|key|numbers|pages))(?=\\"| |\.)/gim
-
 export const createGatsbyNodesFromWPGQLContentNodes = async ({
   wpgqlNodesByContentType,
 }) => {
   const { helpers, pluginOptions } = getGatsbyApi()
+
+  const {
+    data: {
+      generalSettings: { url: wpUrl },
+    },
+  } = await fetchGraphql({
+    query: /* GraphQL */ `
+      query {
+        generalSettings {
+          url
+        }
+      }
+    `,
+  })
+
+  const anchorTagRegex = new RegExp(
+    // eslint-disable-next-line no-useless-escape
+    `<a[\\\s]+[^>]*?href[\\\s]?=["'\\\\]*(${wpUrl}.*?)["'\\\\]*.*?>([^<]+|.*?)?<\/a>`,
+    `gim`
+  )
+
+  // wp supports these file extensions
+  // jpeg|jpg|png|gif|ico|pdf|doc|docx|ppt|pptx|pps|ppsx|odt|xls|psd|mp3|m4a|ogg|wav|mp4|m4v|mov|wmv|avi|mpg|ogv|3gp|3g2|svg|bmp|tif|tiff|asf|asx|wm|wmx|divx|flv|qt|mpe|webm|mkv|txt|asc|c|cc|h|csv|tsv|ics|rtx|css|htm|html|m4b|ra|ram|mid|midi|wax|mka|rtf|js|swf|class|tar|zip|gz|gzip|rar|7z|exe|pot|wri|xla|xlt|xlw|mdb|mpp|docm|dotx|dotm|xlsm|xlsb|xltx|xltm|xlam|pptm|ppsm|potx|potm|ppam|sldx|sldm|onetoc|onetoc2|onetmp|onepkg|odp|ods|odg|odc|odb|odf|wp|wpd|key|numbers|pages
+
+  // gatsby-image supports these file types
+  // const imgSrcRemoteFileRegex = /<img.*?src=\\"(.*?jpeg|jpg|png|webp|tif|tiff$)\\"[^>]+>/gim
 
   const { actions, createContentDigest } = helpers
 
@@ -31,20 +56,52 @@ export const createGatsbyNodesFromWPGQLContentNodes = async ({
         node.path = urlToPath(node.link)
       }
 
+      let nodeString
+
       // here we're searching for file strings in our node
       // we use this to download only the media items
       // that are being used in posts
       // this is important not only for downloading only used images
       // but also for downloading images in post content
       if (wpgqlNodesGroup.plural !== `mediaItems`) {
-        const nodeString = JSON.stringify(node)
+        nodeString = JSON.stringify(node)
 
-        // const imageUrlMatches = execall(imgSrcRemoteFileRegex, nodeString)
+        const anchorTagMatches = execall(anchorTagRegex, nodeString)
+
+        if (anchorTagMatches.length) {
+          anchorTagMatches.forEach(({ match }) => {
+            if (match.includes(`wp-content`) || match.includes(`wp-admin`)) {
+              return
+            }
+
+            // make any links into paths
+            const normalizedTag = match.replace(wpUrl, ``)
+
+            nodeString = nodeString.replace(match, normalizedTag)
+          })
+        }
 
         // if (imageUrlMatches.length) {
-        //   store.dispatch.imageNodes.addImgMatches(imageUrlMatches)
+        //   await new Promise.all(
+        //     imageUrlMatches.map(async capture => {
+        //       const closingTags = execall(/\/>/gim, capture.match)
+        //       const malformedMarkup =
+        //         closingTags.length > 1 || closingTags.length === 0
+        //       if (malformedMarkup) {
+        //         return
+        //       }
+        //       // dd(capture)
+        //     })
+        //   )
+        //   // dd(imageUrlMatches)
+        //   // dd(nodeString)
+        //   // store.dispatch.imageNodes.addImgMatches(imageUrlMatches)
         // }
 
+        /**
+         * no need to find file id's in node content since
+         * we will fetch media items in resolvers
+         */
         if (!pluginOptions.type.MediaItem.lazyNodes) {
           // get an array of all referenced media file ID's
           const matchedIds = execall(/"id":"([^"]*)","sourceUrl"/gm, nodeString)
@@ -57,8 +114,10 @@ export const createGatsbyNodesFromWPGQLContentNodes = async ({
         }
       }
 
+      const parsedNode = nodeString ? JSON.parse(nodeString) : node
+
       const remoteNode = {
-        ...node,
+        ...parsedNode,
         id: node.id,
         parent: null,
         internal: {
