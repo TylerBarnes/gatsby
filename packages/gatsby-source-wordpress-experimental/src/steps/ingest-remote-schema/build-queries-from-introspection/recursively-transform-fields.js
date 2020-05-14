@@ -499,6 +499,9 @@ const transformFields = ({
       const typeName = findTypeName(field.type)
       const fragment = fragments?.[typeName]
 
+      // @todo add any adjacent fields and inline fragments directly to the stored fragment object so this logic can be changed to if (fragment) useTheFragment()
+      // once that's done it can be added above and below transformField() above ☝️
+      // and potentially short circuit expensive work that will be thrown away anyway
       if (fragment && transformedField) {
         // if (fragment && buildingFragment !== typeName && transformedField) {
         // remove fields from this query that already exist in the fragment
