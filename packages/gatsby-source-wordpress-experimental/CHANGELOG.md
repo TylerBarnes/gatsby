@@ -1,6 +1,12 @@
 # Change Log
 
-## Upcoming
+## 0.2.1
+
+### Bug fixes
+
+- Fixed an issue where ommitting the new `debug.graphql.writeQueriesToDisk` would cause build errors
+
+## 0.2.0
 
 ### New Features
 

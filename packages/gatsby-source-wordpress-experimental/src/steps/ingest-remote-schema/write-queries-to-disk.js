@@ -4,7 +4,7 @@ import prettier from "prettier"
 import { formatLogMessage } from "~/utils/format-log-message"
 
 export const writeQueriesToDisk = async ({ reporter }, pluginOptions) => {
-  if (!pluginOptions.debug.graphql.writeQueriesToDisk) {
+  if (!pluginOptions?.debug?.graphql?.writeQueriesToDisk) {
     return
   }
 
