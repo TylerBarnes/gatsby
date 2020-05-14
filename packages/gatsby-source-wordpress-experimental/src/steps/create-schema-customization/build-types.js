@@ -5,14 +5,19 @@ import {
   buildTypeName,
   fieldOfTypeWasFetched,
   getTypeSettingsByType,
-  filterObjectType,
+  filterTypeDefinition,
 } from "./helpers"
 
-const unionType = ({ typeDefs, schema, type, pluginOptions }) => {
+const unionType = typeBuilderApi => {
+  const { typeDefs, schema, type, pluginOptions } = typeBuilderApi
+
   const types = type.possibleTypes
     .filter(
       possibleType =>
-        !typeIsExcluded({ pluginOptions, typeName: possibleType.name })
+        !typeIsExcluded({
+          pluginOptions,
+          typeName: possibleType.name,
+        })
     )
     .map(possibleType => buildTypeName(possibleType.name))
 
@@ -20,34 +25,41 @@ const unionType = ({ typeDefs, schema, type, pluginOptions }) => {
     return
   }
 
-  typeDefs.push(
-    schema.buildUnionType({
-      name: buildTypeName(type.name),
-      types,
-      resolveType: node => {
-        if (node.type) {
-          return buildTypeName(node.type)
-        }
+  let unionType = {
+    name: buildTypeName(type.name),
+    types,
+    resolveType: node => {
+      if (node.type) {
+        return buildTypeName(node.type)
+      }
 
-        if (node.__typename) {
-          return buildTypeName(node.__typename)
-        }
+      if (node.__typename) {
+        return buildTypeName(node.__typename)
+      }
 
-        return null
-      },
-      extensions: { infer: false },
-    })
-  )
+      return null
+    },
+    extensions: {
+      infer: false,
+    },
+  }
+
+  // @todo add this as a plugin option
+  unionType = filterTypeDefinition(unionType, typeBuilderApi, `UNION`)
+
+  typeDefs.push(schema.buildUnionType(unionType))
 }
 
-const interfaceType = ({
-  type,
-  typeDefs,
-  schema,
-  gatsbyNodeTypes,
-  fieldAliases,
-  fieldBlacklist,
-}) => {
+const interfaceType = typeBuilderApi => {
+  const {
+    type,
+    typeDefs,
+    schema,
+    gatsbyNodeTypes,
+    fieldAliases,
+    fieldBlacklist,
+  } = typeBuilderApi
+
   const state = store.getState()
   const { ingestibles, typeMap } = state.remoteSchema
   const { nodeInterfaceTypes } = ingestibles
@@ -77,7 +89,7 @@ const interfaceType = ({
     fieldBlacklist,
   })
 
-  const typeDef = {
+  let typeDef = {
     name: buildTypeName(type.name),
     fields: transformedFields,
     extensions: { infer: false },
@@ -95,6 +107,9 @@ const interfaceType = ({
     typeDef.resolveType = node =>
       node && node.__typename ? buildTypeName(node.__typename) : null
   }
+
+  // @todo add this as a plugin option
+  typeDef = filterTypeDefinition(typeDef, typeBuilderApi, `INTERFACE`)
 
   typeDefs.push(schema.buildInterfaceType(typeDef))
 }
@@ -134,7 +149,16 @@ const objectType = typeBuilderApi => {
       .map(({ name }) => buildTypeName(name))
   }
 
-  if (gatsbyNodeTypes.includes(type.name) || isAGatsbyNode) {
+  if (
+    gatsbyNodeTypes.includes(type.name) ||
+    isAGatsbyNode ||
+    // this accounts for Node types that weren't fetched because
+    // they have no root field to fetch a single node of this type
+    // removing them from the schema breaks the build though
+    // @todo instead, if a node type isn't fetched, remove it
+    // from the entire schema
+    type?.interfaces?.find(({ name }) => name === `Node`)
+  ) {
     // this is used to filter the node interfaces
     // by different content types (post types)
     objectType.fields[`nodeType`] = `String`
@@ -143,7 +167,7 @@ const objectType = typeBuilderApi => {
   }
 
   // @todo add this as a plugin option
-  objectType = filterObjectType(objectType, typeBuilderApi)
+  objectType = filterTypeDefinition(objectType, typeBuilderApi, `OBJECT`)
 
   typeDefs.push(schema.buildObjectType(objectType))
 }

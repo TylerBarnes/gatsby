@@ -1,4 +1,4 @@
-import { buildTypeName } from "../helpers"
+import { buildTypeName, findTypeName, findTypeKind } from "../helpers"
 import { transformUnion, transformListOfUnions } from "./transform-union"
 import { transformGatsbyNodeObject } from "~/steps/create-schema-customization/transform-fields/transform-object"
 import { transformListOfGatsbyNodes } from "./transform-object"
@@ -28,12 +28,47 @@ export const fieldTransformers = [
       (field.type.ofType.name || field.type.ofType?.ofType?.name),
 
     transform: ({ field }) => {
-      if (typeIsABuiltInScalar(field.type)) {
-        return `[${field.type.ofType.name || field.type.ofType?.ofType?.name}]!`
-      }
+      const typeName = findTypeName(field.type)
+      const normalizedTypeName = typeIsABuiltInScalar(field.type)
+        ? typeName
+        : buildTypeName(typeName)
 
-      return `[${buildTypeName(field.type.ofType.name) ??
-        buildTypeName(field.type.ofType?.ofType?.name)}]!`
+      return `[${normalizedTypeName}]!`
+    },
+  },
+
+  {
+    // non null lists of non null types
+    test: field =>
+      field.type.kind === `NON_NULL` &&
+      field.type.ofType.kind === `LIST` &&
+      field.type.ofType?.ofType?.kind === `NON_NULL`,
+
+    transform: ({ field, fieldName }) => {
+      const originalTypeName = findTypeName(field.type)
+      const typeKind = findTypeKind(field.type)
+
+      const normalizedType =
+        typeKind === `SCALAR` && typeIsABuiltInScalar(field.type)
+          ? originalTypeName
+          : buildTypeName(originalTypeName)
+
+      return {
+        type: `[${normalizedType}!]!`,
+        resolve: source => {
+          const resolvedField = source[fieldName]
+
+          if (typeof resolvedField !== `undefined`) {
+            return resolvedField ?? []
+          }
+
+          const autoAliasedFieldPropertyName = `${fieldName}__typename_${field?.type?.name}`
+
+          const aliasedField = source[autoAliasedFieldPropertyName]
+
+          return aliasedField ?? []
+        },
+      }
     },
   },
 
@@ -45,8 +80,7 @@ export const fieldTransformers = [
       (field.type.ofType.name ?? field.type.ofType?.ofType?.name) &&
       typeIsABuiltInScalar(field.type),
 
-    transform: ({ field }) =>
-      `[${field.type.ofType.name ?? field.type.ofType?.ofType?.name}!]`,
+    transform: ({ field }) => `[${findTypeName(field.type)}!]`,
   },
 
   {
@@ -56,9 +90,7 @@ export const fieldTransformers = [
       field.type.ofType.kind === `NON_NULL` &&
       (field.type.ofType.name ?? field.type.ofType?.ofType?.name),
 
-    transform: ({ field }) =>
-      `[${buildTypeName(field.type.ofType.name) ??
-        buildTypeName(field.type.ofType?.ofType?.name)}!]`,
+    transform: ({ field }) => `[${buildTypeName(findTypeName(field.type))}!]`,
   },
 
   {
@@ -68,6 +100,9 @@ export const fieldTransformers = [
       if (typeIsABuiltInScalar(field.type)) {
         return field.type.name
       } else {
+        // custom scalars are typed as JSON
+        // @todo if frequently requested,
+        // make this hookable so a plugin could register a custom scalar
         return `JSON`
       }
     },
@@ -157,4 +192,16 @@ export const fieldTransformers = [
     test: field => field.type.kind === `INTERFACE`,
     transform: ({ field }) => buildTypeName(field.type.name),
   },
+
+  {
+    test: field =>
+      findTypeKind(field.type) !== `LIST` && field.type.kind === `NON_NULL`,
+    transform: ({ field }) => `${buildTypeName(findTypeName(field.type))}!`,
+  },
+
+  // for finding unhandled types
+  // {
+  //   test: () => true,
+  //   transform: ({ field }) => dd(field),
+  // },
 ]

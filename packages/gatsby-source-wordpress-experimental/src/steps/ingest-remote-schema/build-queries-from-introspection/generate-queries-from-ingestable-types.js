@@ -1,15 +1,127 @@
-import { availablePostTypesQuery } from "~/utils/graphql-queries"
-import fetchGraphql from "~/utils/fetch-graphql"
-
 import recursivelyTransformFields from "./recursively-transform-fields"
 import {
   buildNodesQueryOnFieldName,
   buildNodeQueryOnFieldName,
   buildSelectionSet,
+  generateReusableFragments,
 } from "./build-query-on-field-name"
 
 import store from "~/store"
 import { getTypeSettingsByType } from "~/steps/create-schema-customization/helpers"
+import prettier from "prettier"
+import { formatLogMessage } from "~/utils/format-log-message"
+
+const recursivelyAliasFragments = field =>
+  field.inlineFragments.map(fragment => {
+    // for each of this inlineFragments fields
+    fragment.fields = fragment.fields.map(fragmentField => {
+      if (typeof fragmentField === `string`) {
+        return fragmentField
+      }
+
+      // compare it against each field of each other fragment
+      let updatedFragmentField = fragmentField
+
+      field.inlineFragments.forEach(possiblyConflictingFragment => {
+        // don't compare this fragment against itself
+        if (possiblyConflictingFragment.name === fragment.name) {
+          return
+        }
+
+        possiblyConflictingFragment.fields.forEach(possiblyConflictingField => {
+          const fieldNamesMatch =
+            fragmentField.fieldName === possiblyConflictingField.fieldName
+
+          const fieldTypeKindsDontMatch =
+            possiblyConflictingField?.fieldType?.kind !==
+            fragmentField?.fieldType?.kind
+
+          const fieldTypeNamesDontMatch =
+            possiblyConflictingField?.fieldType?.name !==
+            fragmentField?.fieldType?.name
+
+          // if the fields have the same name but a different type kind
+          // alias them
+          if (
+            fieldNamesMatch &&
+            (fieldTypeKindsDontMatch || fieldTypeNamesDontMatch)
+          ) {
+            const autoAliasedFieldName = `${fragmentField.fieldName}__typename_${fragmentField.fieldType.name}: ${fragmentField.fieldName}`
+
+            updatedFragmentField = {
+              ...fragmentField,
+              fieldName: autoAliasedFieldName,
+            }
+
+            return
+          }
+        })
+      })
+      // if the fields have the same name but a different type AND the field has sub fields, compare those sub fields against any fragment fields subfields where the field name matches
+      // if any subfields have conflicting types, alias them
+
+      if (updatedFragmentField.inlineFragments) {
+        updatedFragmentField.inlineFragments = recursivelyAliasFragments(
+          updatedFragmentField
+        )
+      }
+
+      return updatedFragmentField
+    })
+
+    return fragment
+  })
+
+const aliasConflictingFieldFields = field => {
+  // we only have conflicting fields in inlineFragments
+  // if there are no inlineFragments, do nothing
+  if (!field.inlineFragments) {
+    return field
+  }
+
+  field.inlineFragments = recursivelyAliasFragments(field)
+
+  if (field.fields) {
+    field.fields = aliasConflictingFields({
+      transformedFields: field.fields,
+    })
+  }
+
+  return field
+}
+
+const aliasConflictingFields = ({ transformedFields }) =>
+  transformedFields.map(aliasConflictingFieldFields)
+
+const aliasConflictingFragmentFields = ({ fragments }) => {
+  for (const [fragmentKey, fragment] of Object.entries(fragments)) {
+    const aliasedFragment = aliasConflictingFieldFields(fragment)
+
+    fragments[fragmentKey] = aliasedFragment
+  }
+}
+
+const timeFunction = async ({ label, fn, args = {}, disableTimer = false }) => {
+  const {
+    gatsbyApi: {
+      helpers: { reporter },
+    },
+  } = store.getState()
+
+  const activity = reporter.activityTimer(label)
+
+  if (!disableTimer) {
+    activity.start()
+  }
+
+  const result = await fn(args)
+
+  if (!disableTimer) {
+    activity.end()
+  }
+
+  return result
+}
 
 /**
  * generateNodeQueriesFromIngestibleFields
@@ -21,7 +133,17 @@ import { getTypeSettingsByType } from "~/steps/create-schema-customization/helpe
  * @returns {Object} GraphQL query info including gql query strings
  */
 const generateNodeQueriesFromIngestibleFields = async () => {
-  const { remoteSchema } = store.getState()
+  const {
+    remoteSchema,
+    gatsbyApi: {
+      helpers: { reporter },
+      pluginOptions: {
+        debug: {
+          graphql: { copyNodeSourcingQueryAndExit },
+        },
+      },
+    },
+  } = store.getState()
 
   const {
     fieldBlacklist,
@@ -32,19 +154,9 @@ const generateNodeQueriesFromIngestibleFields = async () => {
 
   const rootFields = typeMap.get(`RootQuery`).fields
 
-  // @todo This is temporary. We need a list of post types so we
-  // can add field arguments just to post type fields so we can
-  // get a flat list of posts and pages, instead of having them
-  // nested as children
-  // for example we need to do posts(where: { parent: null }) { nodes { ... }}
-  // https://github.com/wp-graphql/wp-graphql/issues/928
-  const {
-    data: { postTypes },
-  } = await fetchGraphql({ query: availablePostTypesQuery })
-
   let nodeQueries = {}
 
-  for (const { type, name } of nodeListRootFields) {
+  for (const { type, name, args } of nodeListRootFields) {
     if (fieldBlacklist.includes(name)) {
       continue
     }
@@ -68,107 +180,54 @@ const generateNodeQueriesFromIngestibleFields = async () => {
 
     let nodeListQueries = []
 
-    const singleTypeInfo = rootFields.find(
+    const singleNodeRootFieldInfo = rootFields.find(
       field => field.type.name === nodesType.name
     )
 
-    const singleFieldName = singleTypeInfo.name
+    if (!singleNodeRootFieldInfo) {
+      // @todo handle cases where there is a nodelist field but no individual field. we can't do data updates or preview on this type.
+      reporter.warn(
+        formatLogMessage(
+          `Unable to find a single Node query for ${nodesType.name}\n\tThis type will not be available in Gatsby.\n`
+        )
+      )
+      continue
+    }
+
+    const fragments = {}
+
+    const singleFieldName = singleNodeRootFieldInfo?.name
 
     const transformedFields = recursivelyTransformFields({
       fields,
+      fragments,
       parentType: type,
     })
 
-    const recursivelyAliasFragments = field =>
-      field.fragments.map(fragment => {
-        // for each of this fragments fields
-        fragment.fields = fragment.fields.map(fragmentField => {
-          if (typeof fragmentField === `string`) {
-            return fragmentField
-          }
+    // mutates the fragments..
+    aliasConflictingFragmentFields({ fragments })
 
-          // compare it against each field of each other fragment
-          let updatedFragmentField = fragmentField
-
-          field.fragments.forEach(possiblyConflictingFragment => {
-            // don't compare this fragment against itself
-            if (possiblyConflictingFragment.name === fragment.name) {
-              return
-            }
-
-            possiblyConflictingFragment.fields.forEach(
-              possiblyConflictingField => {
-                const fieldNamesMatch =
-                  fragmentField.fieldName === possiblyConflictingField.fieldName
-
-                const fieldTypeKindsDontMatch =
-                  possiblyConflictingField?.fieldType?.kind !==
-                  fragmentField?.fieldType?.kind
-
-                const fieldTypeNamesDontMatch =
-                  possiblyConflictingField?.fieldType?.name !==
-                  fragmentField?.fieldType?.name
-
-                // if the fields have the same name but a different type kind
-                // alias them
-                if (
-                  fieldNamesMatch &&
-                  (fieldTypeKindsDontMatch || fieldTypeNamesDontMatch)
-                ) {
-                  const autoAliasedFieldName = `${fragmentField.fieldName}__typename_${fragmentField.fieldType.name}: ${fragmentField.fieldName}`
-
-                  updatedFragmentField = {
-                    ...fragmentField,
-                    fieldName: autoAliasedFieldName,
-                  }
-
-                  return
-                }
-              }
-            )
-          })
-          // if the fields have the same name but a different type AND the field has sub fields, compare those sub fields against any fragment fields subfields where the field name matches
-          // if any subfields have conflicting types, alias them
-
-          if (updatedFragmentField.fragments) {
-            updatedFragmentField.fragments = recursivelyAliasFragments(
-              updatedFragmentField
-            )
-          }
-
-          return updatedFragmentField
-        })
-
-        return fragment
-      })
-
-    const aliasConflictingFields = async ({ transformedFields }) => {
-      transformedFields = transformedFields.map(field => {
-        // we only have conflicting fields in fragments
-        // if there are no fragments, do nothing
-        if (!field.fragments) {
-          return field
-        }
-
-        field.fragments = recursivelyAliasFragments(field)
-
-        return field
-      })
-
-      return transformedFields
-    }
-
-    const aliasedTransformedFields = await aliasConflictingFields({
+    const aliasedTransformedFields = aliasConflictingFields({
       transformedFields,
       parentType: type,
     })
 
-    const selectionSet = buildSelectionSet(aliasedTransformedFields)
+    const selectionSet = buildSelectionSet(aliasedTransformedFields, {
+      fieldPath: name,
+      fragments,
+    })
+
+    const builtFragments = generateReusableFragments({
+      fragments,
+      selectionSet,
+    })
 
     const nodeQuery = buildNodeQueryOnFieldName({
       fields: transformedFields,
       fieldName: singleFieldName,
       settings,
+      builtFragments,
+      builtSelectionSet: selectionSet,
     })
 
     const previewQuery = buildNodeQueryOnFieldName({
@@ -177,7 +236,21 @@ const generateNodeQueriesFromIngestibleFields = async () => {
       fieldInputArguments: `id: $id, idType: DATABASE_ID`,
       queryName: `PREVIEW_QUERY`,
       settings,
+      builtFragments,
+      builtSelectionSet: selectionSet,
     })
+
+    const whereArgs = args.find(arg => arg.name === `where`)
+
+    const needsNullParent = whereArgs
+      ? !!whereArgs.type.inputFields.find(
+          inputField => inputField.name === `parent`
+        )
+      : false
+
+    const fieldVariables = needsNullParent
+      ? `where: { parent: null ${settings.where || ``} }`
+      : settings.where || ``
 
     if (
       settings.nodeListQueries &&
@@ -186,12 +259,13 @@ const generateNodeQueriesFromIngestibleFields = async () => {
       const queries = settings.nodeListQueries({
         name,
         fields,
-        postTypes,
         selectionSet,
+        builtFragments,
         singleFieldName,
-        singleTypeInfo,
+        singleNodeRootFieldInfo,
         settings,
         store,
+        fieldVariables,
         remoteSchema,
         transformedFields,
         helpers: {
@@ -209,11 +283,41 @@ const generateNodeQueriesFromIngestibleFields = async () => {
       const nodeListQuery = buildNodesQueryOnFieldName({
         fields: transformedFields,
         fieldName: name,
-        postTypes,
+        fieldVariables,
         settings,
+        builtFragments,
+        builtSelectionSet: selectionSet,
       })
 
       nodeListQueries = [nodeListQuery]
+    }
+
+    if (
+      process.env.NODE_ENV === `development` &&
+      nodesType.name === copyNodeSourcingQueryAndExit
+    ) {
+      try {
+        reporter.log(``)
+        reporter.warn(
+          formatLogMessage(
+            `Query debug mode. Writing node list query for the ${nodesType.name} node type to the system clipboard and exiting\n\n`
+          )
+        )
+        await clipboardy.write(
+          prettier.format(nodeListQueries[0], { parser: `graphql` })
+        )
+        process.exit()
+      } catch (e) {
+        reporter.log(``)
+        reporter.error(e)
+        reporter.log(``)
+        reporter.warn(
+          formatLogMessage(
+            `Query debug mode failed. There was a failed attempt to copy the query for the ${nodesType.name} node type to your clipboard.\n\n`
+          )
+        )
+        reporter.error(e)
+      }
     }
 
     // build a query info object containing gql query strings for fetching
@@ -229,6 +333,7 @@ const generateNodeQueriesFromIngestibleFields = async () => {
       nodeQuery,
       previewQuery,
       selectionSet,
+      builtFragments,
       settings,
     }
   }

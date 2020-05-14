@@ -24,7 +24,7 @@ const identifyAndStoreIngestableFieldsAndTypes = async () => {
       // our lazy types won't initially be fetched,
       // so we need to mark them as fetched here
       if (
-        typeSettings.lazyNodes &&
+        (typeSettings.lazyNodes || pluginOptions.type?.__all?.lazyNodes) &&
         !typeIsExcluded({ pluginOptions, typeName })
       ) {
         const lazyType = typeMap.get(typeName)
@@ -107,6 +107,23 @@ const identifyAndStoreIngestableFieldsAndTypes = async () => {
     }
 
     if (fieldBlacklist.includes(field.name)) {
+      continue
+    }
+
+    const takesIDinput = field?.args?.find(arg => arg.type.name === `ID`)
+
+    // if a non-node root field takes an id input, we 99% likely can't use it.
+    // so don't fetch it and don't add it to the schema.
+    if (takesIDinput) {
+      continue
+    }
+
+    if (
+      // if this type is excluded on the RootQuery, skip it
+      pluginOptions.type.RootQuery?.excludeFieldNames?.find(
+        excludedFieldName => excludedFieldName === field.name
+      )
+    ) {
       continue
     }
 

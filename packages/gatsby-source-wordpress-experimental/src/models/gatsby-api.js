@@ -13,7 +13,10 @@ const defaultPluginOptions = {
       copyQueryOnError: false,
       panicOnError: false,
       onlyReportCriticalErrors: true,
+      copyNodeSourcingQueryAndExit: false,
+      writeQueriesToDisk: false,
     },
+    disableCompatibilityCheck: false,
   },
   develop: {
     nodeUpdateInterval: 300,
@@ -22,13 +25,32 @@ const defaultPluginOptions = {
   production: {
     hardCacheMediaFiles: false,
   },
+  auth: {
+    htaccess: {
+      username: null,
+      password: null,
+    },
+  },
   schema: {
-    queryDepth: 10,
+    queryDepth: 15,
+    circularQueryLimit: 5,
     typePrefix: `Wp`,
     timeout: 30 * 1000, // 30 seconds
   },
-  excludeFields: [`editLock`, `revisionOf`],
+  excludeFieldNames: [],
   type: {
+    __all: {
+      dateFields: [`date`],
+    },
+    RootQuery: {
+      excludeFieldNames: [`viewer`, `node`, `schemaMd5`],
+    },
+    Settings: {
+      excludeFieldNames: [`generalSettingsEmail`],
+    },
+    GeneralSettings: {
+      excludeFieldNames: [`email`],
+    },
     ActionMonitorAction: {
       exclude: true,
     },
@@ -57,7 +79,6 @@ const defaultPluginOptions = {
       excludeFieldNames: [
         `extraCapabilities`,
         `capKey`,
-        `description`,
         `email`,
         `registeredDate`,
       ],
@@ -81,11 +102,18 @@ const defaultPluginOptions = {
             remoteNode.remoteFile = {
               id: createdMediaItem.id,
             }
+            remoteNode.localFile = {
+              id: createdMediaItem.id,
+            }
 
             return {
               remoteNode,
             }
           }
+        }
+
+        return {
+          remoteNode,
         }
       },
     },

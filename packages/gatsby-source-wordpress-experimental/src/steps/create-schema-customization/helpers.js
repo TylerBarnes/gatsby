@@ -1,5 +1,5 @@
 import store from "~/store"
-import { objectTypeFilters } from "./type-filters"
+import { typeDefinitionFilters } from "./type-filters"
 import { getPluginOptions } from "~/utils/get-gatsby-api"
 
 /**
@@ -22,22 +22,32 @@ export const buildTypeName = name => {
   return prefix + name
 }
 
+/**
+ * Find the first type name of a Type definition pulled via introspection
+ * @param {object} type
+ */
+export const findTypeName = type =>
+  type?.name ||
+  type?.ofType?.name ||
+  type?.ofType?.ofType?.name ||
+  type?.ofType?.ofType?.ofType?.name
+
+/**
+ * Find the first type kind of a Type definition pulled via introspection
+ * @param {object} type
+ */
+export const findTypeKind = type =>
+  type?.kind ||
+  type?.ofType?.kind ||
+  type?.ofType?.ofType?.kind ||
+  type?.ofType?.ofType?.ofType?.kind
+
 export const fieldOfTypeWasFetched = type => {
   const { fetchedTypes } = store.getState().remoteSchema
+  const typeName = findTypeName(type)
+  const typeWasFetched = !!fetchedTypes.get(typeName)
 
-  if (fetchedTypes.get(type.name)) {
-    return true
-  }
-
-  if (type.ofType && fetchedTypes.get(type.ofType.name)) {
-    return true
-  }
-
-  if (type?.ofType?.ofType && fetchedTypes.get(type.ofType.ofType.name)) {
-    return true
-  }
-
-  return false
+  return typeWasFetched
 }
 
 const supportedScalars = [
@@ -53,24 +63,16 @@ const supportedScalars = [
 export const typeIsABuiltInScalar = type =>
   // @todo the next function and this one are redundant.
   // see the next todo on how to fix the issue. If that todo is resolved, these functions will be identical. :(
-  supportedScalars.includes(
-    type.name || type.ofType.name || type.ofType?.ofType?.name
-  )
+  supportedScalars.includes(findTypeName(type))
 
 export const typeIsASupportedScalar = type => {
-  if (
-    type.kind !== `SCALAR` ||
-    type?.ofType?.kind !== `SCALAR` ||
-    type?.ofType?.ofType?.kind !== `SCALAR`
-  ) {
+  if (findTypeKind(type) !== `SCALAR`) {
     // @todo returning true here seems wrong since a type that is not a scalar can't be a supported scalar... so there is some other logic elsewhere that is wrong
     // making this return false causes errors in the schema
     return true
   }
 
-  return supportedScalars.includes(
-    type.name || type.ofType.name || type.ofType?.ofType?.name
-  )
+  return supportedScalars.includes(findTypeName(type))
 }
 
 // retrieves plugin settings for the provided type
@@ -79,27 +81,45 @@ export const getTypeSettingsByType = type => {
     return {}
   }
 
-  const typeSettings = store.getState().gatsbyApi.pluginOptions.type
+  // the plugin options object containing every type setting
+  const allTypeSettings = store.getState().gatsbyApi.pluginOptions.type
 
-  if (typeSettings[type.name]) {
-    return typeSettings[type.name]
+  // the type.__all plugin option which is applied to every type setting
+  const __allTypeSetting = allTypeSettings.__all || {}
+
+  const typeName = findTypeName(type)
+  const typeSettings = allTypeSettings[typeName]
+
+  if (typeSettings) {
+    return { ...__allTypeSetting, ...typeSettings }
   }
 
-  if (type.ofType && typeSettings[type.ofType.name]) {
-    return typeSettings[type.ofType.name]
-  }
-
-  return {}
+  return __allTypeSetting
 }
 
-export const filterObjectType = (objectType, typeBuilderApi) => {
-  const filter = objectTypeFilters.find(
-    filter => typeBuilderApi.type.name === filter.typeName
+/**
+ * This is used to filter the automatically generated type definitions before they're added to the schema customization api.
+ */
+export const filterTypeDefinition = (
+  typeDefinition,
+  typeBuilderApi,
+  typeKind
+) => {
+  const filters = typeDefinitionFilters.filter(filter =>
+    [typeBuilderApi.type.name, `__all`].includes(filter.typeName)
   )
 
-  if (filter && typeof filter.typeDef === `function`) {
-    objectType = filter.typeDef(objectType, typeBuilderApi)
+  if (filters?.length) {
+    filters.forEach(filter => {
+      if (filter && typeof filter.typeDef === `function`) {
+        typeDefinition = filter.typeDef(
+          typeDefinition,
+          typeBuilderApi,
+          typeKind
+        )
+      }
+    })
   }
 
-  return objectType
+  return typeDefinition
 }

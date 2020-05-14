@@ -3,6 +3,7 @@ import {
   fieldOfTypeWasFetched,
   typeIsASupportedScalar,
   getTypeSettingsByType,
+  findTypeName,
 } from "../helpers"
 
 const handleCustomScalars = field => {
@@ -73,11 +74,9 @@ const excludeField = ({
   // this field has required input args
   (field.args && field.args.find(arg => arg.type.kind === `NON_NULL`)) ||
   // this field has no typeName
-  (!field.type.name &&
-    !field.type?.ofType?.name &&
-    !field.type?.ofType?.name &&
-    !field.type?.ofType?.ofType?.name) ||
+  !findTypeName(field.type) ||
   // field is a non null object
+  // @todo this looks unnecessary. Need to look into why non null object types are excluded
   (field.type.kind === `NON_NULL` && field.type.ofType.kind === `OBJECT`) ||
   // field is a non null enum
   (field.type.kind === `NON_NULL` && field.type.ofType.kind === `ENUM`)
@@ -87,6 +86,7 @@ const excludeField = ({
  * with proper node linking and type namespacing
  * also filters out unusable fields and types
  */
+
 export const transformFields = ({
   fields,
   fieldAliases,
@@ -140,19 +140,13 @@ export const transformFields = ({
         // and check for aliased fields
         // fields are aliased automatically if they have conflicting types
         // with other fields of the same name when placed in side-by-side
-        // fragments on the same union or interface type.
+        // inlineFragments on the same union or interface type.
         transformedField = {
           type: transformedField,
           resolve: source => {
             const resolvedField = source[fieldName]
 
-            if (
-              resolvedField ||
-              // account for falsy values
-              resolvedField === false ||
-              resolvedField === `` ||
-              resolvedField === 0
-            ) {
+            if (typeof resolvedField !== `undefined`) {
               return resolvedField
             }
 

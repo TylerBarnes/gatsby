@@ -7,6 +7,7 @@ import { identifyAndStoreIngestableFieldsAndTypes } from "./identify-and-store-i
 import { buildNonNodeQueries } from "./build-and-store-ingestible-root-field-non-node-queries"
 import { buildNodeQueries } from "./build-queries-from-introspection/build-node-queries"
 import { cacheFetchedTypes } from "./cache-fetched-types"
+import { writeQueriesToDisk } from "./write-queries-to-disk"
 
 const ingestRemoteSchema = async (helpers, pluginOptions) => {
   // @todo if this is an inc build or preview, we need quicker logic
@@ -23,18 +24,23 @@ const ingestRemoteSchema = async (helpers, pluginOptions) => {
 
   activity.start()
 
-  await runSteps(
-    [
-      checkIfSchemaHasChanged,
-      introspectAndStoreRemoteSchema,
-      identifyAndStoreIngestableFieldsAndTypes,
-      buildNodeQueries,
-      buildNonNodeQueries,
-      cacheFetchedTypes,
-    ],
-    helpers,
-    pluginOptions
-  )
+  try {
+    await runSteps(
+      [
+        checkIfSchemaHasChanged,
+        introspectAndStoreRemoteSchema,
+        identifyAndStoreIngestableFieldsAndTypes,
+        buildNodeQueries,
+        buildNonNodeQueries,
+        cacheFetchedTypes,
+        writeQueriesToDisk,
+      ],
+      helpers,
+      pluginOptions
+    )
+  } catch (e) {
+    helpers.reporter.panic(e)
+  }
 
   activity.end()
 }

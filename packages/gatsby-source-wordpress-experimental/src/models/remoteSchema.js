@@ -1,3 +1,5 @@
+import { findTypeName } from "~/steps/create-schema-customization/helpers"
+
 const remoteSchema = {
   state: {
     // @todo rename queries to nodeQueries
@@ -14,6 +16,7 @@ const remoteSchema = {
     },
     fetchedTypes: new Map(),
     fieldBlacklist: [
+      `dateGmt`,
       `isWpGatsby`,
       `edges`,
       // these aren't useful without authentication
@@ -24,6 +27,8 @@ const remoteSchema = {
       `jwtAuthToken`,
       `jwtRefreshToken`,
       `jwtUserSecret`,
+      `editLock`,
+      `revisionOf`,
     ],
     // @todo make this a plugin option
     fieldAliases: {
@@ -57,7 +62,7 @@ const remoteSchema = {
     },
 
     addFetchedType(state, type) {
-      const key = type.name || type.ofType.name || type.ofType?.ofType?.name
+      const key = findTypeName(type)
 
       if (!key) {
         return state

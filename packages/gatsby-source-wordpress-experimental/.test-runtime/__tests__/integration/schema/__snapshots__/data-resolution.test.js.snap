@@ -1,10 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`[gatsby-source-wordpress-experimental] schema hasn't altered the local Gatsby schema 1`] = `"a950ca03f958d8a67c8f1e15fdbaa093"`;
-
-exports[`[gatsby-source-wordpress-experimental] schema hasn't altered the remote WPGraphQL schema 1`] = `"a1eb269a958ac32ca26ff45fc0212b44"`;
-
-exports[`[gatsby-source-wordpress-experimental] schema resolves menus 1`] = `
+exports[`[gatsby-source-wordpress-experimental] data resolution resolves menus 1`] = `
 Object {
   "data": Object {
     "allWpMenu": Object {
@@ -71,7 +67,7 @@ Object {
 }
 `;
 
-exports[`[gatsby-source-wordpress-experimental] schema resolves menus INCREMENTED 1`] = `
+exports[`[gatsby-source-wordpress-experimental] data resolution resolves menus INCREMENTED 1`] = `
 Object {
   "data": Object {
     "allWpMenu": Object {
@@ -138,7 +134,7 @@ Object {
 }
 `;
 
-exports[`[gatsby-source-wordpress-experimental] schema resolves pages 1`] = `
+exports[`[gatsby-source-wordpress-experimental] data resolution resolves pages 1`] = `
 Object {
   "data": Object {
     "allWpPage": Object {
@@ -164,11 +160,9 @@ Object {
                           "portrait": Object {
                             "altText": "",
                             "caption": null,
-                            "commentCount": null,
                             "commentStatus": "open",
                             "databaseId": 99,
                             "date": "2020-03-02T20:58:44",
-                            "dateGmt": "2020-03-02T20:58:44",
                             "description": null,
                             "desiredSlug": null,
                             "sourceUrl": "https://dev-automated-testing-gatsby-source-wordpress-wpgraphql.pantheonsite.io/wp-content/uploads/2020/03/avatar.jpg",
@@ -202,7 +196,6 @@ Object {
 ",
                         "databaseId": 98,
                         "date": "2020-03-02T20:59:13",
-                        "dateGmt": "2020-03-02T20:59:13",
                         "desiredSlug": null,
                         "enclosure": null,
                         "excerpt": "<p>Creator and maintainer of&nbsp;WPGraphQL&nbsp;(GraphQL for WordPress). Occasional conference speaker.</p>
@@ -282,11 +275,9 @@ Object {
                           "portrait": Object {
                             "altText": "",
                             "caption": null,
-                            "commentCount": null,
                             "commentStatus": "open",
                             "databaseId": 99,
                             "date": "2020-03-02T20:58:44",
-                            "dateGmt": "2020-03-02T20:58:44",
                             "description": null,
                             "desiredSlug": null,
                             "sourceUrl": "https://dev-automated-testing-gatsby-source-wordpress-wpgraphql.pantheonsite.io/wp-content/uploads/2020/03/avatar.jpg",
@@ -320,7 +311,6 @@ Object {
 ",
                         "databaseId": 98,
                         "date": "2020-03-02T20:59:13",
-                        "dateGmt": "2020-03-02T20:59:13",
                         "desiredSlug": null,
                         "enclosure": null,
                         "excerpt": "<p>Creator and maintainer of&nbsp;WPGraphQL&nbsp;(GraphQL for WordPress). Occasional conference speaker.</p>
@@ -407,7 +397,7 @@ Object {
 }
 `;
 
-exports[`[gatsby-source-wordpress-experimental] schema resolves pages INCREMENTED 1`] = `
+exports[`[gatsby-source-wordpress-experimental] data resolution resolves pages INCREMENTED 1`] = `
 Object {
   "data": Object {
     "allWpPage": Object {
@@ -433,11 +423,9 @@ Object {
                           "portrait": Object {
                             "altText": "",
                             "caption": null,
-                            "commentCount": null,
                             "commentStatus": "open",
                             "databaseId": 99,
                             "date": "2020-03-02T20:58:44",
-                            "dateGmt": "2020-03-02T20:58:44",
                             "description": null,
                             "desiredSlug": null,
                             "sourceUrl": "https://dev-automated-testing-gatsby-source-wordpress-wpgraphql.pantheonsite.io/wp-content/uploads/2020/03/avatar.jpg",
@@ -471,7 +459,6 @@ Object {
 ",
                         "databaseId": 98,
                         "date": "2020-03-02T20:59:13",
-                        "dateGmt": "2020-03-02T20:59:13",
                         "desiredSlug": null,
                         "enclosure": null,
                         "excerpt": "<p>Creator and maintainer of&nbsp;WPGraphQL&nbsp;(GraphQL for WordPress). Occasional conference speaker.</p>
@@ -551,11 +538,9 @@ Object {
                           "portrait": Object {
                             "altText": "",
                             "caption": null,
-                            "commentCount": null,
                             "commentStatus": "open",
                             "databaseId": 99,
                             "date": "2020-03-02T20:58:44",
-                            "dateGmt": "2020-03-02T20:58:44",
                             "description": null,
                             "desiredSlug": null,
                             "sourceUrl": "https://dev-automated-testing-gatsby-source-wordpress-wpgraphql.pantheonsite.io/wp-content/uploads/2020/03/avatar.jpg",
@@ -589,7 +574,6 @@ Object {
 ",
                         "databaseId": 98,
                         "date": "2020-03-02T20:59:13",
-                        "dateGmt": "2020-03-02T20:59:13",
                         "desiredSlug": null,
                         "enclosure": null,
                         "excerpt": "<p>Creator and maintainer of&nbsp;WPGraphQL&nbsp;(GraphQL for WordPress). Occasional conference speaker.</p>
@@ -676,7 +660,7 @@ Object {
 }
 `;
 
-exports[`[gatsby-source-wordpress-experimental] schema resolves posts 1`] = `
+exports[`[gatsby-source-wordpress-experimental] data resolution resolves posts 1`] = `
 Object {
   "data": Object {
     "allWpPost": Object {
@@ -705,7 +689,7 @@ Object {
 }
 `;
 
-exports[`[gatsby-source-wordpress-experimental] schema resolves posts INCREMENTED 1`] = `
+exports[`[gatsby-source-wordpress-experimental] data resolution resolves posts INCREMENTED 1`] = `
 Object {
   "data": Object {
     "allWpPost": Object {
@@ -734,7 +718,7 @@ Object {
 }
 `;
 
-exports[`[gatsby-source-wordpress-experimental] schema resolves root fields 1`] = `
+exports[`[gatsby-source-wordpress-experimental] data resolution resolves root fields 1`] = `
 Object {
   "data": Object {
     "wp": Object {
@@ -743,7 +727,6 @@ Object {
         "discussionSettingsDefaultPingStatus": "open",
         "generalSettingsDateFormat": "F j, Y",
         "generalSettingsDescription": "Just another WordPress site",
-        "generalSettingsEmail": null,
         "generalSettingsLanguage": "en_US",
         "generalSettingsStartOfWeek": 1,
         "generalSettingsTimeFormat": "g:i a",
@@ -766,7 +749,7 @@ Object {
 }
 `;
 
-exports[`[gatsby-source-wordpress-experimental] schema resolves root fields INCREMENTED 1`] = `
+exports[`[gatsby-source-wordpress-experimental] data resolution resolves root fields INCREMENTED 1`] = `
 Object {
   "data": Object {
     "wp": Object {
@@ -775,7 +758,6 @@ Object {
         "discussionSettingsDefaultPingStatus": "open",
         "generalSettingsDateFormat": "F j, Y",
         "generalSettingsDescription": "Just another WordPress site",
-        "generalSettingsEmail": null,
         "generalSettingsLanguage": "en_US",
         "generalSettingsStartOfWeek": 1,
         "generalSettingsTimeFormat": "g:i a",
@@ -798,7 +780,7 @@ Object {
 }
 `;
 
-exports[`[gatsby-source-wordpress-experimental] schema resolves users 1`] = `
+exports[`[gatsby-source-wordpress-experimental] data resolution resolves users 1`] = `
 Object {
   "data": Object {
     "allWpUser": Object {
@@ -839,7 +821,7 @@ Object {
 }
 `;
 
-exports[`[gatsby-source-wordpress-experimental] schema resolves users INCREMENTED 1`] = `
+exports[`[gatsby-source-wordpress-experimental] data resolution resolves users INCREMENTED 1`] = `
 Object {
   "data": Object {
     "allWpUser": Object {
