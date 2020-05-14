@@ -1,5 +1,5 @@
 import store from "~/store"
-import { objectTypeFilters } from "./type-filters"
+import { typeDefinitionFilters } from "./type-filters"
 import { getPluginOptions } from "~/utils/get-gatsby-api"
 
 /**
@@ -97,14 +97,29 @@ export const getTypeSettingsByType = type => {
   return __allTypeSetting
 }
 
-export const filterObjectType = (objectType, typeBuilderApi) => {
-  const filter = objectTypeFilters.find(
-    filter => typeBuilderApi.type.name === filter.typeName
+/**
+ * This is used to filter the automatically generated type definitions before they're added to the schema customization api.
+ */
+export const filterTypeDefinition = (
+  typeDefinition,
+  typeBuilderApi,
+  typeKind
+) => {
+  const filters = typeDefinitionFilters.filter(filter =>
+    [typeBuilderApi.type.name, `__all`].includes(filter.typeName)
   )
 
-  if (filter && typeof filter.typeDef === `function`) {
-    objectType = filter.typeDef(objectType, typeBuilderApi)
+  if (filters?.length) {
+    filters.forEach(filter => {
+      if (filter && typeof filter.typeDef === `function`) {
+        typeDefinition = filter.typeDef(
+          typeDefinition,
+          typeBuilderApi,
+          typeKind
+        )
+      }
+    })
   }
 
-  return objectType
+  return typeDefinition
 }

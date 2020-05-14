@@ -112,7 +112,6 @@ describe(`[gatsby-source-wordpress-experimental] data resolution`, () => {
                               caption
                               commentStatus
                               date
-                              dateGmt
                               databaseId
                               description
                               desiredSlug
@@ -134,7 +133,6 @@ describe(`[gatsby-source-wordpress-experimental] data resolution`, () => {
                           content
                           databaseId
                           date
-                          dateGmt
                           desiredSlug
                           enclosure
                           excerpt

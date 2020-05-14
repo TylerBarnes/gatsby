@@ -163,7 +163,6 @@ Object {
                             "commentStatus": "open",
                             "databaseId": 99,
                             "date": "2020-03-02T20:58:44",
-                            "dateGmt": "2020-03-02T20:58:44",
                             "description": null,
                             "desiredSlug": null,
                             "sourceUrl": "https://dev-automated-testing-gatsby-source-wordpress-wpgraphql.pantheonsite.io/wp-content/uploads/2020/03/avatar.jpg",
@@ -197,7 +196,6 @@ Object {
 ",
                         "databaseId": 98,
                         "date": "2020-03-02T20:59:13",
-                        "dateGmt": "2020-03-02T20:59:13",
                         "desiredSlug": null,
                         "enclosure": null,
                         "excerpt": "<p>Creator and maintainer of&nbsp;WPGraphQL&nbsp;(GraphQL for WordPress). Occasional conference speaker.</p>
@@ -280,7 +278,6 @@ Object {
                             "commentStatus": "open",
                             "databaseId": 99,
                             "date": "2020-03-02T20:58:44",
-                            "dateGmt": "2020-03-02T20:58:44",
                             "description": null,
                             "desiredSlug": null,
                             "sourceUrl": "https://dev-automated-testing-gatsby-source-wordpress-wpgraphql.pantheonsite.io/wp-content/uploads/2020/03/avatar.jpg",
@@ -314,7 +311,6 @@ Object {
 ",
                         "databaseId": 98,
                         "date": "2020-03-02T20:59:13",
-                        "dateGmt": "2020-03-02T20:59:13",
                         "desiredSlug": null,
                         "enclosure": null,
                         "excerpt": "<p>Creator and maintainer of&nbsp;WPGraphQL&nbsp;(GraphQL for WordPress). Occasional conference speaker.</p>
@@ -430,7 +426,6 @@ Object {
                             "commentStatus": "open",
                             "databaseId": 99,
                             "date": "2020-03-02T20:58:44",
-                            "dateGmt": "2020-03-02T20:58:44",
                             "description": null,
                             "desiredSlug": null,
                             "sourceUrl": "https://dev-automated-testing-gatsby-source-wordpress-wpgraphql.pantheonsite.io/wp-content/uploads/2020/03/avatar.jpg",
@@ -464,7 +459,6 @@ Object {
 ",
                         "databaseId": 98,
                         "date": "2020-03-02T20:59:13",
-                        "dateGmt": "2020-03-02T20:59:13",
                         "desiredSlug": null,
                         "enclosure": null,
                         "excerpt": "<p>Creator and maintainer of&nbsp;WPGraphQL&nbsp;(GraphQL for WordPress). Occasional conference speaker.</p>
@@ -547,7 +541,6 @@ Object {
                             "commentStatus": "open",
                             "databaseId": 99,
                             "date": "2020-03-02T20:58:44",
-                            "dateGmt": "2020-03-02T20:58:44",
                             "description": null,
                             "desiredSlug": null,
                             "sourceUrl": "https://dev-automated-testing-gatsby-source-wordpress-wpgraphql.pantheonsite.io/wp-content/uploads/2020/03/avatar.jpg",
@@ -581,7 +574,6 @@ Object {
 ",
                         "databaseId": 98,
                         "date": "2020-03-02T20:59:13",
-                        "dateGmt": "2020-03-02T20:59:13",
                         "desiredSlug": null,
                         "enclosure": null,
                         "excerpt": "<p>Creator and maintainer of&nbsp;WPGraphQL&nbsp;(GraphQL for WordPress). Occasional conference speaker.</p>

@@ -1,7 +1,25 @@
 import { createRemoteMediaItemNode } from "~/steps/source-nodes/create-nodes/create-remote-media-item-node"
 
 // @todo move this to plugin options
-export const objectTypeFilters = [
+export const typeDefinitionFilters = [
+  {
+    typeName: `__all`,
+    typeDef: typeDef => {
+      if (typeDef?.fields?.date) {
+        const dateField = {
+          ...typeDef.fields.date,
+          type: `Date`,
+          extensions: {
+            dateformat: {},
+          },
+        }
+
+        typeDef.fields.date = dateField
+      }
+
+      return typeDef
+    },
+  },
   {
     typeName: `MediaItem`,
     typeDef: (objectType, { pluginOptions }) => {

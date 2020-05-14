@@ -339,7 +339,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
       }
       content
       date
-      dateGmt
       id
       karma
       wpParent: parent {
@@ -415,7 +414,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     content
     date
-    dateGmt
     id
     karma
     wpParent: parent {
@@ -486,7 +484,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     content
     date
-    dateGmt
     id
     karma
     wpParent: parent {
@@ -715,7 +712,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
       }
       databaseId
       date
-      dateGmt
       description
       desiredSlug
       editLast {
@@ -881,7 +877,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     description
     desiredSlug
     editLast {
@@ -1042,7 +1037,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     description
     desiredSlug
     editLast {
@@ -1507,7 +1501,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
       }
       databaseId
       date
-      dateGmt
       desiredSlug
       editLast {
         id
@@ -1681,7 +1674,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     desiredSlug
     editLast {
       id
@@ -1850,7 +1842,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     desiredSlug
     editLast {
       id
@@ -1994,7 +1985,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
       }
       databaseId
       date
-      dateGmt
       desiredSlug
       editLast {
         id
@@ -2136,7 +2126,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     desiredSlug
     editLast {
       id
@@ -2273,7 +2262,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     desiredSlug
     editLast {
       id
@@ -2397,7 +2385,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
       }
       databaseId
       date
-      dateGmt
       desiredSlug
       editLast {
         id
@@ -2481,7 +2468,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     desiredSlug
     editLast {
       id
@@ -2560,7 +2546,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     desiredSlug
     editLast {
       id
@@ -3003,7 +2988,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
       }
       databaseId
       date
-      dateGmt
       desiredSlug
       editLast {
         id
@@ -3162,7 +3146,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     desiredSlug
     editLast {
       id
@@ -3316,7 +3299,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     desiredSlug
     editLast {
       id
@@ -3424,7 +3406,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
       }
       databaseId
       date
-      dateGmt
       desiredSlug
       editLast {
         id
@@ -3516,7 +3497,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     desiredSlug
     editLast {
       id
@@ -3603,7 +3583,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     desiredSlug
     editLast {
       id
@@ -3691,7 +3670,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
       }
       databaseId
       date
-      dateGmt
       desiredSlug
       editLast {
         id
@@ -3763,7 +3741,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     desiredSlug
     editLast {
       id
@@ -3830,7 +3807,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     desiredSlug
     editLast {
       id
@@ -3898,7 +3874,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
       }
       databaseId
       date
-      dateGmt
       desiredSlug
       editLast {
         id
@@ -3970,7 +3945,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     desiredSlug
     editLast {
       id
@@ -4037,7 +4011,6 @@ exports[`[gatsby-source-wordpress-experimental] query generation [gatsby-source-
     }
     databaseId
     date
-    dateGmt
     desiredSlug
     editLast {
       id

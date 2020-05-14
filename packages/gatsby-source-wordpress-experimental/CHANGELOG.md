@@ -1,5 +1,15 @@
 # Change Log
 
+## 0.3.0
+
+### New Features
+
+- Any field named `date` is now treated as being of `Date` type and can make use of the `dateFormat` input args. In the future WPGraphQL will have a Date Scalar and that will be used to determine what should be a date instead of the field name.
+
+### Breaking Changes
+
+- Fields named `dateGmt` are automatically ignored
+
 ## 0.2.1
 
 ### Bug fixes

@@ -39,6 +39,9 @@ const defaultPluginOptions = {
   },
   excludeFieldNames: [],
   type: {
+    __all: {
+      dateFields: [`date`],
+    },
     RootQuery: {
       excludeFieldNames: [`viewer`, `node`, `schemaMd5`],
     },
