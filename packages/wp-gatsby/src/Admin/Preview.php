@@ -100,7 +100,7 @@ class Preview {
 
 		$global_relay_id = Relay::toGlobalId(
 			$post_type_object->name,
-			absint( $original_post->ID ?? $post_ID )
+			$original_post->ID ?? $post_ID
 		);
 
 		$referenced_node_single_name

@@ -17,10 +17,7 @@
   "autoload": {
     "psr-4": {
       "WPGatsby\\": "src/"
-    },
-    "classmap": [
-      "src/"
-    ]
+    }
   },
   "config": {
     "optimize-autoloader": true
@@ -40,5 +37,9 @@
     "fix-cs": [
       "php ./vendor/bin/phpcbf src"
     ]
+  },
+  "require-dev": {
+    "szepeviktor/phpstan-wordpress": "^0.6.0",
+    "wp-graphql/wp-graphql": "^0.8.3"
   }
 }

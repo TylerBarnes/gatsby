@@ -330,7 +330,7 @@ if ( ! class_exists( 'WPGraphQL_Settings_API' ) ) :
 		 *
 		 * @param  array $args settings field args
 		 *
-		 * @return string
+		 * @return void
 		 */
 		function callback_html( $args ) {
 			echo $this->get_field_description( $args );

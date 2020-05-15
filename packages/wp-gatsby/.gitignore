@@ -1,3 +1,4 @@
 .idea
-vendor
+/vendor
 .DS_Store
+/wp-content
